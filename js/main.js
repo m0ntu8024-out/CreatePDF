@@ -5,83 +5,87 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
     alert('The File APIs are not fully supported in this browser.');
 }
 
+var newsdateInput;
+var imgsDiv;
 function start() {
-    document.getElementById('files').addEventListener('change', handleFileSelect, false);
-    document.getElementById('savePDF').addEventListener('click', savePDF_1, false);
-    document.getElementById('download').addEventListener('click', downloadFiles, false );
+    document.getElementById('fetchImages').addEventListener('click', fetchImages, false);
+    document.getElementById('savePDF').addEventListener('click', savePDF, false);
+    document.getElementById('print').addEventListener('click', printPDF, false);
+    newsdateInput = document.getElementById('newsdate');
+    imgsDiv = document.getElementById('imgs');
+    newsdateInput.value=getTodayDate();
 }
 
-array = [];
-maxLength = 1206.0;
-maxWidth = 850.0;
+function getTodayDate() {
+    const val = new Date();
+    year = val.getFullYear();
+    month = formatNumber(val.getMonth() + 1);
+    day = formatNumber(val.getDate());
 
-function handleFileSelect(evt) {
-    var files = evt.target.files; // FileList object
+    return `${year}-${month}-${day}`;
+}
 
-    // files is a FileList of File objects. List some properties.
-    for (var i = 0, f; f = files[i]; i++) {
-        if (f.type.match('image.*')) {
+function fetchImages() {
+    val = newsdate.valueAsDate;
+    year = val.getFullYear();
+    month = formatNumber(val.getMonth() + 1);
+    day = formatNumber(val.getDate());
 
-            readFileAsDataImage(f);
-        }
+    imgsDiv.innerHTML = '';
+    for (i = 1; i <= 12; i++) {
+        str = `http://www.enewspapr.com/News/GUJARAT/AHM/${year}/${month}/${day}/${year}${month}${day}_${i}.jpeg`;
+        createImageTag(str);
     }
 }
 
-function readFileAsDataImage(file) {
-
-    let reader = new FileReader();
-    reader.onload = function (e) {
-        array.push(e.target.result);
-    };
-
-    reader.readAsDataURL(file);
-}
-
-function savePDF(evt) {
-    doc = new jsPDF({ unit : 'px', format: [900.0, 640.0]});
-
-    for (i = 0; i < array.length; i++) {
-        doc.addImage(array[i],0 ,0 );
-        if(i !== ( array.length - 1) )
-        {
-            doc.addPage();
-        }
-    }
-    doc.save('a4.pdf')
-    document.getElementById('files').value = '';
-}
-
-
-function downloadFiles() {
-    //const f = document.getElementById('fileNames').value.split(',');
-    downloadResources(['http://www.enewspapr.com/News/GUJARAT/AHM/2020/03/28/20200328_4.jpeg', 'http://www.enewspapr.com/News/GUJARAT/AHM/2020/03/28/20200328_5.jpeg'])
-}
-
-function downloadResources( srcList )
-{    
-    var i = 0;
-
-    setInterval(function(){
-        if(srcList.length > i){            
-            var link = document.createElement("a");
-            link.id=i;
-            link.download = srcList[i];
-            link.href = srcList[i];
-            link.click();
-            i++;
-        }
-    },1500);
-}
-
-function savePDF_1(evt) {
-    const doc = new jsPDF({ unit : 'px', format: [900.0, 640.0]});
+function savePDF() {
+    const doc = new jsPDF({ unit: 'px', format: [900.0, 640.0] });
     const imgs = document.getElementsByClassName('myImage');
+
     for (i = 0; i < imgs.length; i++) {
-        doc.addImage(imgs[i],0 ,0 );
-        if(i !== ( imgs.length - 1) )
-        {
+        doc.addImage(imgs[i], 'JPEG', 0, 0);
+        if (i !== (imgs.length - 1)) {
             doc.addPage();
         }
     }
-    doc.save('a4.pdf')    
+    doc.save(`${newsdate.value}_gujarat.pdf`)
+}
+
+function formatNumber(val) {
+    return ("0" + "" + (val)).slice(-2)
+}
+
+function createImageTag(url) {
+    var img = document.createElement('img');
+    img.src = url;
+    img.classList.add("myImage");
+    imgsDiv.appendChild(img);
+}
+
+function printPDF() {
+    setImageWidth();
+    document.title = getTitle();
+    setTimeout(() => { window.print() }, 10);
+}
+
+function setImageWidth() {
+    const imgs = document.getElementsByClassName('myImage');
+
+    let imgWidth = imgs[0].width;
+    for (i = 0; i < imgs.length; i++) {
+        imgWidth = Math.min(imgWidth, imgs[i].width);   
+    }
+
+    for (i = 0; i < imgs.length; i++) {
+        imgs[i].style.width=imgWidth + "px";
+    }
+}
+
+function getTitle() {
+    val = newsdate.valueAsDate;
+    year = val.getFullYear();
+    month = formatNumber(val.getMonth() + 1);
+    day = formatNumber(val.getDate());
+
+    return `${year}${month}${day}_gujarat`;
 }

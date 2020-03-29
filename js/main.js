@@ -9,7 +9,7 @@ var newsdateInput;
 var imgsDiv;
 function start() {
     document.getElementById('fetchImages').addEventListener('click', fetchImages, false);
-    document.getElementById('savePDF').addEventListener('click', savePDF, false);
+    //document.getElementById('savePDF').addEventListener('click', savePDF, false);
     document.getElementById('print').addEventListener('click', printPDF, false);
     newsdateInput = document.getElementById('newsdate');
     imgsDiv = document.getElementById('imgs');
